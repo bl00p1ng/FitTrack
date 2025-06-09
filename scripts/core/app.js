@@ -163,9 +163,9 @@ class FitTrackApp {
         // Define las rutas de la aplicación
         this.router.addRoute('/', () => this.showView('homeView'));
         this.router.addRoute('/workout/:id', (params) => this.showWorkout(params.id));
-        this.router.addRoute('/routine/create', () => this.showView('routineView'));
+        this.router.addRoute('/routine/create', () => this.createRoutine());
         this.router.addRoute('/routine/edit/:id', (params) => this.editRoutine(params.id));
-        this.router.addRoute('/exercise/create', () => this.showView('exerciseForm'));
+        this.router.addRoute('/exercise/create', () => this.createExercise());
         this.router.addRoute('/exercise/edit/:id', (params) => this.editExercise(params.id));
         
         // Maneja rutas no encontradas
@@ -210,6 +210,8 @@ class FitTrackApp {
      * @param {string} viewName - Nombre de la vista a mostrar
      */
     showView(viewName) {
+        console.log('App: Showing view', viewName);
+        
         if (this.currentView) {
             this.currentView.hide();
         }
@@ -218,6 +220,7 @@ class FitTrackApp {
         if (view) {
             this.currentView = view;
             view.show();
+            console.log('App: View shown successfully', viewName);
         } else {
             console.error('App: View not found', viewName);
         }
@@ -241,6 +244,23 @@ class FitTrackApp {
             console.error('App: Error loading workout', error);
             this.router.navigate('/');
         }
+    }
+    
+    /**
+     * Crea una nueva rutina
+     */
+    createRoutine() {
+        this.showView('routineView');
+        this.components.routineView.createNew();
+    }
+    
+    /**
+     * Crea un nuevo ejercicio
+     * @param {string} routineId - ID de la rutina (opcional)
+     */
+    createExercise(routineId = null) {
+        this.showView('exerciseForm');
+        this.components.exerciseForm.createNew(routineId);
     }
     
     /**

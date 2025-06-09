@@ -23,9 +23,7 @@ const STATIC_ASSETS = [
     '/scripts/components/workout-view.js',
     '/scripts/components/routine-view.js',
     '/scripts/components/exercise-form.js',
-    '/config/manifest.json',
-    '/assets/icons/icon-192x192.png',
-    '/assets/icons/icon-512x512.png'
+    '/config/manifest.json'
 ];
 
 /**
