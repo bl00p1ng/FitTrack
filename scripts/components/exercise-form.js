@@ -98,9 +98,9 @@ class ExerciseForm {
                 <header class="exercise-form__header">
                     <div class="container">
                         <div class="form-header__content">
-                            <button class="btn-icon" id="backBtn" title="Volver">
+                            <a href="/" class="btn-icon" id="backBtn">
                                 ${this.getBackIcon()}
-                            </button>
+                            </a>
                             <h1 class="exercise-form__title">${title}</h1>
                             <div class="form-header__spacer"></div>
                         </div>

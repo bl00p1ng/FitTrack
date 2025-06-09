@@ -104,9 +104,9 @@ class WorkoutView {
                 <header class="workout-header">
                     <div class="container">
                         <div class="workout-header__content">
-                            <button class="btn-icon" id="backBtn" title="Volver">
+                            <a href="/" class="btn-icon" id="backBtn">
                                 ${this.getBackIcon()}
-                            </button>
+                            </a>
                             <div class="workout-header__info">
                                 <h1 class="workout-header__title">${this.escapeHtml(this.workout.routineName)}</h1>
                                 <div class="workout-header__progress">
