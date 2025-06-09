@@ -88,7 +88,7 @@ class HomeView {
                             Realiza un seguimiento de tus entrenamientos, gestiona tus rutinas 
                             y alcanza tus objetivos de entrenamiento.
                         </p>
-                        <button class="btn btn--primary btn--full-width" id="createRoutineBtn">
+                        <button class="btn btn--outiline btn--full-width" id="createRoutineBtn">
                             Crear Rutina
                         </button>
                     </div>

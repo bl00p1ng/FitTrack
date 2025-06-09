@@ -439,6 +439,12 @@ body {
     padding: var(--spacing-lg);
 }
 
+.btn--outiline {
+    background: transparent;
+    border: 1px solid var(--color-background);
+    color: var(--color-background);
+}
+
 /**
  * Componentes base - Inputs
  */
