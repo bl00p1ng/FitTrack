@@ -479,6 +479,9 @@ body {
 }
 
 .hero {
+    max-width: 80%;
+    margin: 2rem auto 0 auto;
+    border-radius: 12px;
     background: linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 100%);
     color: white;
     text-align: center;
