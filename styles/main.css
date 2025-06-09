@@ -554,6 +554,10 @@ body {
     }
     
     .hero {
+        width: 100%;
+        max-width: none;
+        border-radius: 0;
+        margin-top: 0;
         padding: var(--spacing-xl) var(--spacing-md);
     }
     
