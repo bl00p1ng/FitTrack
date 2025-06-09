@@ -117,7 +117,7 @@ class HomeView {
                                 <p class="empty-state__description">
                                     Crea tu primera rutina para comenzar a entrenar
                                 </p>
-                                <button class="btn btn--secondary" id="createFirstRoutineBtn">
+                                <button class="btn btn--primary" id="createFirstRoutineBtn">
                                     Crear mi primera rutina
                                 </button>
                             </div>
