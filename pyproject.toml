@@ -1,0 +1,35 @@
+[project]
+name = "fittrack"
+version = "0.1.0"
+description = "A workout routine tracking web application built with Flask"
+authors = [
+    { name = "bl00p1ng", email = "blooping@protonmail.com" }
+]
+dependencies = [
+    "flask>=3.1.2",
+    "flask-wtf>=1.2.2",
+    "flask-login>=0.6.3",
+    "flask-sqlalchemy>=3.1.1",
+    "psycopg[binary]>=3.2.10",
+    "python-slugify>=8.0.4",
+    "email-validator>=2.3.0",
+]
+readme = "README.md"
+requires-python = ">= 3.12"
+
+[project.scripts]
+"fittrack" = "fittrack:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.rye]
+managed = true
+dev-dependencies = []
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/fittrack"]
