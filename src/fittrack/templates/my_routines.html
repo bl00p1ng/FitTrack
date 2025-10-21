@@ -1,10 +1,11 @@
 {% extends "base_template.html" %}
 
-{% block title %}My Routines - FitTrack{% endblock %}
+{% block title %}Mis Rutinas - FitTrack{% endblock %}
 
 {% block content %}
 <div class="my-routines">
     <h1>Mis Rutinas de Entrenamiento</h1>
+    <p class="page-subtitle">Administra todas tus rutinas creadas</p>
 
     {% if routines %}
         <div class="routines-grid">
@@ -25,12 +26,33 @@
                     </p>
                     <div class="routine-meta">
                         <span class="routine-date">
-                            Created: {{ routine.created_at.strftime('%b %d, %Y') }}
+                            Creado: {{ routine.created_at.strftime('%d/%m/%Y') }}
+                        </span>
+                        <span class="routine-exercises-count">
+                            {{ routine.exercises|length }} ejercicio{% if routine.exercises|length != 1 %}s{% endif %}
                         </span>
                     </div>
-                    <a href="{{ url_for('routine_detail', slug=routine.slug) }}" class="btn btn-sm">
-                        View Details
-                    </a>
+
+                    <!-- Botones de acción -->
+                    <div class="card-actions">
+                        <a href="{{ url_for('routine_detail', slug=routine.slug) }}" class="btn btn-sm btn-primary">
+                            Ver Detalles
+                        </a>
+                        <a href="{{ url_for('edit_routine', routine_id=routine.id) }}" class="btn btn-sm btn-secondary">
+                            ✏️ Editar
+                        </a>
+                        <button type="button" class="btn btn-sm btn-danger"
+                                data-routine-id="{{ routine.id }}"
+                                data-routine-name="{{ routine.name }}"
+                                onclick="confirmDeleteData(this)">
+                            🗑️
+                        </button>
+                    </div>
+
+                    <!-- Formulario oculto para eliminar -->
+                    <form id="delete-form-{{ routine.id }}" method="POST" action="{{ url_for('delete_routine', routine_id=routine.id) }}" style="display: none;">
+                        {{ delete_form.hidden_tag() }}
+                    </form>
                 </div>
             {% endfor %}
         </div>
@@ -41,4 +63,52 @@
         </div>
     {% endif %}
 </div>
+
+<style>
+.page-subtitle {
+    color: var(--text-light);
+    margin-bottom: 2rem;
+}
+
+.routine-exercises-count {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.card-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+
+.btn-sm.btn-danger {
+    background-color: var(--error-color);
+    color: white;
+    padding: 0.4rem 0.8rem;
+}
+
+.btn-sm.btn-danger:hover {
+    opacity: 0.8;
+}
+
+.btn-sm.btn-secondary {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+.btn-sm.btn-primary {
+    flex: 1;
+}
+</style>
+
+<script>
+function confirmDeleteData(button) {
+    const routineId = button.getAttribute('data-routine-id');
+    const routineName = button.getAttribute('data-routine-name');
+    if (confirm('¿Estás seguro de que deseas eliminar la rutina "' + routineName + '"? Esta acción no se puede deshacer.')) {
+        document.getElementById('delete-form-' + routineId).submit();
+    }
+}
+</script>
 {% endblock %}

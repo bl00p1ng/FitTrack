@@ -117,3 +117,12 @@ class RoutineForm(FlaskForm):
         validators=[DataRequired(message='Por favor seleccione un nivel de dificultad')]
     )
     submit = SubmitField('Guardar Rutina')
+
+
+class DeleteForm(FlaskForm):
+    """
+    Formulario simple para confirmación de eliminación.
+
+    Solo contiene el token CSRF para proteger la operación DELETE.
+    """
+    submit = SubmitField('Eliminar')

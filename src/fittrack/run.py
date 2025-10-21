@@ -10,7 +10,7 @@ from sqlalchemy.exc import IntegrityError
 
 from .models import db, User, Routine, Exercise
 import json
-from .forms import SignupForm, LoginForm, RoutineForm
+from .forms import SignupForm, LoginForm, RoutineForm, DeleteForm
 
 
 # Initialize Flask app
@@ -89,7 +89,8 @@ def routine_detail(slug):
     routine = Routine.get_by_slug(slug)
     if not routine:
         abort(404)
-    return render_template('routine_view.html', routine=routine)
+    delete_form = DeleteForm()
+    return render_template('routine_view.html', routine=routine, delete_form=delete_form)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -261,7 +262,145 @@ def my_routines():
         Plantilla renderizada con rutinas del usuario
     """
     routines = Routine.get_by_user(current_user.id)
-    return render_template('my_routines.html', routines=routines)
+    delete_form = DeleteForm()
+    return render_template('my_routines.html', routines=routines, delete_form=delete_form)
+
+
+@app.route('/admin/routine/<int:routine_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_routine(routine_id):
+    """
+    Edita una rutina existente.
+    Solo el dueño de la rutina puede editarla.
+
+    Args:
+        routine_id: ID de la rutina a editar
+
+    Returns:
+        Redirige a detalle de rutina en éxito, formulario en GET/fallo
+    """
+    routine = Routine.query.get_or_404(routine_id)
+    
+    # Verifica que el usuario actual sea el dueño de la rutina
+    if routine.user_id != current_user.id:
+        flash('No tienes permiso para editar esta rutina.', 'error')
+        return redirect(url_for('index'))
+    
+    form = RoutineForm()
+    
+    if form.validate_on_submit():
+        try:
+            # Actualiza los datos de la rutina
+            routine.name = form.name.data
+            routine.description = form.description.data
+            routine.difficulty = form.difficulty.data
+            
+            # Regenera el slug si el nombre cambió
+            old_slug = routine.slug
+            new_slug = routine.generate_slug()
+            if old_slug != new_slug:
+                routine.slug = new_slug
+            
+            # Elimina todos los ejercicios existentes
+            Exercise.query.filter_by(routine_id=routine.id).delete()
+            
+            # Procesa los nuevos ejercicios desde request.form
+            exercise_indices = set()
+            for key in request.form.keys():
+                if key.startswith('exercises[') and '][' in key:
+                    index = key.split('[')[1].split(']')[0]
+                    exercise_indices.add(int(index))
+            
+            # Crea los ejercicios actualizados
+            for idx in sorted(exercise_indices):
+                exercise_name = request.form.get(f'exercises[{idx}][name]')
+                exercise_sets = request.form.get(f'exercises[{idx}][sets]')
+                exercise_reps = request.form.get(f'exercises[{idx}][reps]')
+                exercise_weight = request.form.get(f'exercises[{idx}][weight]')
+                exercise_unit = request.form.get(f'exercises[{idx}][weight_unit]', 'kg')
+                exercise_notes = request.form.get(f'exercises[{idx}][notes]', '')
+                
+                if exercise_name and exercise_sets and exercise_reps:
+                    exercise = Exercise(
+                        routine_id=routine.id,
+                        name=exercise_name,
+                        sets=int(exercise_sets),
+                        reps=int(exercise_reps),
+                        weight=float(exercise_weight) if exercise_weight else None,
+                        weight_unit=exercise_unit,
+                        order=idx,
+                        notes=exercise_notes
+                    )
+                    db.session.add(exercise)
+            
+            db.session.commit()
+            flash('Rutina actualizada exitosamente!', 'success')
+            return redirect(url_for('routine_detail', slug=routine.slug))
+            
+        except IntegrityError:
+            db.session.rollback()
+            flash('Ocurrió un error al actualizar la rutina.', 'error')
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error: {str(e)}', 'error')
+    
+    # Pre-llena el formulario con los datos existentes en GET
+    if request.method == 'GET':
+        form.name.data = routine.name
+        form.description.data = routine.description
+        form.difficulty.data = routine.difficulty
+
+    # Convierte los ejercicios a diccionarios para serialización JSON
+    exercises_data = [
+        {
+            'name': ex.name,
+            'sets': ex.sets,
+            'reps': ex.reps,
+            'weight': ex.weight,
+            'weight_unit': ex.weight_unit,
+            'notes': ex.notes or ''
+        }
+        for ex in routine.exercises
+    ]
+
+    return render_template('admin/routine_form_edit.html',
+                         form=form,
+                         title='Editar Rutina',
+                         routine=routine,
+                         exercises_data=exercises_data)
+
+
+@app.route('/admin/routine/<int:routine_id>/delete', methods=['POST'])
+@login_required
+def delete_routine(routine_id):
+    """
+    Elimina una rutina existente.
+    Solo el dueño de la rutina puede eliminarla.
+
+    Args:
+        routine_id: ID de la rutina a eliminar
+
+    Returns:
+        Redirige a mis rutinas después de eliminar
+    """
+    routine = Routine.query.get_or_404(routine_id)
+    
+    # Verifica que el usuario actual sea el dueño de la rutina
+    if routine.user_id != current_user.id:
+        flash('No tienes permiso para eliminar esta rutina.', 'error')
+        return redirect(url_for('index'))
+    
+    try:
+        routine_name = routine.name
+        db.session.delete(routine)
+        db.session.commit()
+        flash(f'Rutina "{routine_name}" eliminada exitosamente.', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error al eliminar la rutina: {str(e)}', 'error')
+    
+    return redirect(url_for('my_routines'))
+
 
 
 # MANEJO DE ERRORES
