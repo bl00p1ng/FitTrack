@@ -1,0 +1,44 @@
+{% extends "base_template.html" %}
+
+{% block title %}My Routines - FitTrack{% endblock %}
+
+{% block content %}
+<div class="my-routines">
+    <h1>Mis Rutinas de Entrenamiento</h1>
+
+    {% if routines %}
+        <div class="routines-grid">
+            {% for routine in routines %}
+                <div class="routine-card">
+                    <div class="routine-header">
+                        <h3>
+                            <a href="{{ url_for('routine_detail', slug=routine.slug) }}">
+                                {{ routine.name }}
+                            </a>
+                        </h3>
+                        <span class="difficulty-badge difficulty-{{ routine.difficulty|lower }}">
+                            {{ routine.difficulty }}
+                        </span>
+                    </div>
+                    <p class="routine-description">
+                        {{ routine.description[:150] }}{% if routine.description|length > 150 %}...{% endif %}
+                    </p>
+                    <div class="routine-meta">
+                        <span class="routine-date">
+                            Created: {{ routine.created_at.strftime('%b %d, %Y') }}
+                        </span>
+                    </div>
+                    <a href="{{ url_for('routine_detail', slug=routine.slug) }}" class="btn btn-sm">
+                        View Details
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <p>Aún no has creado ninguna rutina.</p>
+            <a href="{{ url_for('create_routine') }}" class="btn btn-primary">Crea tu Primera Rutina</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
