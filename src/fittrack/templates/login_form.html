@@ -1,0 +1,53 @@
+{% extends "base_template.html" %}
+
+{% block title %}Login - FitTrack{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="form-card">
+        <h1>Ingresar a FitTrack</h1>
+        <p class="form-subtitle">Ingresa tus credenciales para acceder a tu cuenta</p>
+
+        <form method="POST" action="{{ url_for('login') }}" novalidate>
+            {{ form.hidden_tag() }}
+
+            <div class="form-group">
+                {{ form.email.label }}
+                {{ form.email(class="form-control", placeholder="tucorreol@ejemplo.com") }}
+                {% if form.email.errors %}
+                    <div class="form-errors">
+                        {% for error in form.email.errors %}
+                            <span class="error">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                {{ form.password.label }}
+                {{ form.password(class="form-control", placeholder="Ingresa tu contraseña") }}
+                {% if form.password.errors %}
+                    <div class="form-errors">
+                        {% for error in form.password.errors %}
+                            <span class="error">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group checkbox-group">
+                {{ form.remember_me(class="form-checkbox") }}
+                {{ form.remember_me.label }}
+            </div>
+
+            <div class="form-actions">
+                {{ form.submit(class="btn btn-primary btn-block") }}
+            </div>
+        </form>
+
+        <div class="form-footer">
+            <p>¿No tienes una cuenta? <a href="{{ url_for('signup') }}">Regístrate aquí</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}
