@@ -358,7 +358,7 @@ body {
 
 /* Forms */
 .form-container {
-    max-width: 600px;
+    max-width: 1200px;
     margin: 2rem auto;
 }
 
@@ -370,7 +370,7 @@ body {
 }
 
 .form-card-wide {
-    max-width: 1200px;
+    max-width: 1200px !important;
     margin: 2rem auto;
 }
 
