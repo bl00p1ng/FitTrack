@@ -1,0 +1,72 @@
+{% extends "base_template.html" %}
+
+{% block title %}{{ title }} - FitTrack{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="form-card form-card-wide">
+        <h1>{{ title }}</h1>
+        <p class="form-subtitle">Completa los detalles de tu rutina de entrenamiento</p>
+
+        <form method="POST" action="{{ url_for('create_routine') }}" novalidate>
+            {{ form.hidden_tag() }}
+
+            <div class="form-group">
+                {{ form.name.label }}
+                {{ form.name(class="form-control", placeholder="Ej. Rutina de Piernas") }}
+                {% if form.name.errors %}
+                    <div class="form-errors">
+                        {% for error in form.name.errors %}
+                            <span class="error">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                {{ form.difficulty.label }}
+                {{ form.difficulty(class="form-control") }}
+                {% if form.difficulty.errors %}
+                    <div class="form-errors">
+                        {% for error in form.difficulty.errors %}
+                            <span class="error">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                {{ form.description.label }}
+                {{ form.description(class="form-control", rows="5", placeholder="Describe tu rutina, objetivos, etc") }}
+                {% if form.description.errors %}
+                    <div class="form-errors">
+                        {% for error in form.description.errors %}
+                            <span class="error">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                {{ form.exercises.label }}
+                {{ form.exercises(class="form-control", rows="8", placeholder="Ejemplo:\n- Sentadillas: 3 sets x 10 reps\n- Press Banca: 3 sets x 8 reps\n- Peso muerto: 3 sets x 5 reps") }}
+                {% if form.exercises.errors %}
+                    <div class="form-errors">
+                        {% for error in form.exercises.errors %}
+                            <span class="error">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                {% if form.exercises.description %}
+                    <small class="form-help">{{ form.exercises.description }}</small>
+                {% endif %}
+            </div>
+
+            <div class="form-actions">
+                {{ form.submit(class="btn btn-primary") }}
+                <a href="{{ url_for('index') }}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
