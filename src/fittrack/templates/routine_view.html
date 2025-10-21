@@ -1,0 +1,49 @@
+{% extends "base_template.html" %}
+
+{% block title %}{{ routine.name }} - FitTrack{% endblock %}
+
+{% block content %}
+<div class="routine-detail">
+    <div class="routine-detail-header">
+        <div class="breadcrumb">
+            <a href="{{ url_for('index') }}">Inicio</a> / <span>{{ routine.name }}</span>
+        </div>
+        <h1>{{ routine.name }}</h1>
+        <div class="routine-detail-meta">
+            <span class="difficulty-badge difficulty-{{ routine.difficulty|lower }}">
+                {{ routine.difficulty }}
+            </span>
+            <span class="meta-item">
+                <strong>Creado por:</strong> {{ routine.author.username }}
+            </span>
+            <span class="meta-item">
+                <strong>Fecha:</strong> {{ routine.created_at.strftime('%B %d, %Y') }}
+            </span>
+        </div>
+    </div>
+
+    <section class="routine-section">
+        <h2>Description</h2>
+        <div class="routine-content">
+            {{ routine.description }}
+        </div>
+    </section>
+
+    <section class="routine-section">
+        <h2>Exercises</h2>
+        <div class="exercises-content">
+            {{ routine.exercises|replace('\n', '<br>')|safe }}
+        </div>
+    </section>
+
+    {% if current_user.is_authenticated and current_user.id == routine.user_id %}
+        <div class="routine-actions">
+            <p class="info-text">Esta es tu rutina. Puedes editarla o eliminarla.</p>
+        </div>
+    {% endif %}
+
+    <div class="routine-back">
+        <a href="{{ url_for('index') }}" class="btn btn-secondary">Volver a Todas las Rutinas</a>
+    </div>
+</div>
+{% endblock %}
