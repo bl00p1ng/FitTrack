@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}FitTrack - Seguimiento de Rutinas{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- Navegación -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <a href="{{ url_for('index') }}">FitTrack</a>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="{{ url_for('index') }}">Inicio</a></li>
+                {% if current_user.is_authenticated %}
+                    <li><a href="{{ url_for('create_routine') }}">Crear Rutina</a></li>
+                    <li><a href="{{ url_for('my_routines') }}">Mis Rutinas</a></li>
+                    <li class="nav-user">
+                        <span>Hola, {{ current_user.username }}!</span>
+                    </li>
+                    <li><a href="{{ url_for('logout') }}" class="btn-logout">Salir</a></li>
+                {% else %}
+                    <li><a href="{{ url_for('login') }}" class="btn-login">Ingresar</a></li>
+                    <li><a href="{{ url_for('signup') }}" class="btn-signup">Registrarse</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Mensajes Flash -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                <div class="container">
+                    {% for category, message in messages %}
+                        <div class="flash flash-{{ category }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Contenido Principal -->
+    <main class="main-content">
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- Pie de página -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 FitTrack. Hecho con ❤︎ por <a href="https://github.com/bl00p1ng" target="_blank">Andrés López</a></p>
+        </div>
+    </footer>
+</body>
+</html>
