@@ -17,23 +17,55 @@
                 <strong>Creado por:</strong> {{ routine.author.username }}
             </span>
             <span class="meta-item">
-                <strong>Fecha:</strong> {{ routine.created_at.strftime('%B %d, %Y') }}
+                <strong>Fecha:</strong> {{ routine.created_at.strftime('%d/%m/%Y') }}
             </span>
         </div>
     </div>
 
     <section class="routine-section">
-        <h2>Description</h2>
+        <h2>Descripción</h2>
         <div class="routine-content">
             {{ routine.description }}
         </div>
     </section>
 
     <section class="routine-section">
-        <h2>Exercises</h2>
-        <div class="exercises-content">
-            {{ routine.exercises|replace('\n', '<br>')|safe }}
-        </div>
+        <h2>Ejercicios</h2>
+        {% if routine.exercises %}
+            <div class="exercises-list">
+                {% for exercise in routine.exercises %}
+                    <div class="exercise-detail-card">
+                        <div class="exercise-detail-header">
+                            <h3>{{ loop.index }}. {{ exercise.name }}</h3>
+                        </div>
+                        <div class="exercise-detail-info">
+                            <div class="exercise-info-item">
+                                <span class="info-label">Series:</span>
+                                <span class="info-value">{{ exercise.sets }}</span>
+                            </div>
+                            <div class="exercise-info-item">
+                                <span class="info-label">Repeticiones:</span>
+                                <span class="info-value">{{ exercise.reps }}</span>
+                            </div>
+                            {% if exercise.weight %}
+                            <div class="exercise-info-item">
+                                <span class="info-label">Peso:</span>
+                                <span class="info-value">{{ exercise.weight }} {{ exercise.weight_unit }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% if exercise.notes %}
+                        <div class="exercise-notes">
+                            <span class="notes-label">Notas:</span>
+                            <p>{{ exercise.notes }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="empty-message">No hay ejercicios en esta rutina.</p>
+        {% endif %}
     </section>
 
     {% if current_user.is_authenticated and current_user.id == routine.user_id %}
@@ -46,4 +78,78 @@
         <a href="{{ url_for('index') }}" class="btn btn-secondary">Volver a Todas las Rutinas</a>
     </div>
 </div>
+
+<style>
+.exercises-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.exercise-detail-card {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border-left: 4px solid var(--primary-color);
+}
+
+.exercise-detail-header h3 {
+    color: var(--accent-color);
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+}
+
+.exercise-detail-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.exercise-info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.info-label {
+    font-weight: 600;
+    color: var(--text-light);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.info-value {
+    font-size: 1.1rem;
+    color: var(--accent-color);
+    font-weight: bold;
+}
+
+.exercise-notes {
+    padding-top: 1rem;
+    border-top: 1px solid #dee2e6;
+    margin-top: 1rem;
+}
+
+.notes-label {
+    font-weight: 600;
+    color: var(--text-light);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+}
+
+.exercise-notes p {
+    margin-top: 0.5rem;
+    color: var(--text-dark);
+    line-height: 1.6;
+}
+
+.empty-message {
+    text-align: center;
+    color: var(--text-light);
+    padding: 2rem;
+    font-style: italic;
+}
+</style>
 {% endblock %}

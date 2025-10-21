@@ -96,22 +96,18 @@ class User(UserMixin, db.Model):
 
 class Routine(db.Model):
     """
-    Routine model representing a workout routine.
+    Modelo de rutina que representa una rutina de entrenamiento.
 
-    Each routine belongs to a user and contains:
-    - Name and description
-    - Exercise details
-    - Difficulty level
-    - Slug for SEO-friendly URLs
+    Cada rutina pertenece a un usuario y contiene ejercicios relacionados.
 
-    Attributes:
-        id: Primary key
-        user_id: Foreign key to User (with cascade delete)
-        name: Routine name/title
-        description: Detailed routine description
-        exercises: List of exercises in JSON format
-        difficulty: Beginner, Intermediate, or Advanced
-        slug: SEO-friendly URL identifier (unique)
+    Atributos:
+        id: Clave primaria
+        user_id: Clave foránea a User (con eliminación en cascada)
+        name: Nombre de la rutina
+        description: Descripción detallada de la rutina
+        difficulty: Nivel de dificultad (Beginner, Intermediate, Advanced)
+        slug: Identificador único para URLs amigables
+        exercises: Relación con ejercicios de la rutina
     """
     __tablename__ = 'routines'
 
@@ -119,11 +115,13 @@ class Routine(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True)
     name = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text, nullable=False)
-    exercises = db.Column(db.Text, nullable=False)  # Stored as comma-separated or JSON
     difficulty = db.Column(db.String(20), nullable=False, default='Beginner')
     slug = db.Column(db.String(250), unique=True, nullable=False, index=True)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     updated_at = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
+
+    # Relación con ejercicios (one-to-many con eliminación en cascada)
+    exercises = db.relationship('Exercise', backref='routine', lazy=True, cascade='all, delete-orphan', order_by='Exercise.order')
 
     def generate_slug(self):
         """
@@ -212,3 +210,37 @@ class Routine(db.Model):
 
     def __repr__(self):
         return f'<Routine {self.name}>'
+
+
+class Exercise(db.Model):
+    """
+    Modelo de ejercicio que representa un ejercicio individual dentro de una rutina.
+
+    Cada ejercicio pertenece a una rutina y contiene información detallada sobre
+    el ejercicio como nombre, series, repeticiones, peso y unidades.
+
+    Atributos:
+        id: Clave primaria
+        routine_id: Clave foránea a Routine (con eliminación en cascada)
+        name: Nombre del ejercicio
+        sets: Número de series
+        reps: Número de repeticiones por serie
+        weight: Peso a utilizar
+        weight_unit: Unidad del peso (kg o lb)
+        order: Orden del ejercicio en la rutina
+        notes: Notas adicionales opcionales
+    """
+    __tablename__ = 'exercises'
+
+    id = db.Column(db.Integer, primary_key=True)
+    routine_id = db.Column(db.Integer, db.ForeignKey('routines.id', ondelete='CASCADE'), nullable=False, index=True)
+    name = db.Column(db.String(200), nullable=False)
+    sets = db.Column(db.Integer, nullable=False)
+    reps = db.Column(db.Integer, nullable=False)
+    weight = db.Column(db.Float, nullable=True)
+    weight_unit = db.Column(db.String(10), nullable=False, default='kg')
+    order = db.Column(db.Integer, nullable=False, default=0)
+    notes = db.Column(db.Text, nullable=True)
+
+    def __repr__(self):
+        return f'<Exercise {self.name}>'

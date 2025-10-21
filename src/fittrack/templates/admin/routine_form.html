@@ -8,12 +8,12 @@
         <h1>{{ title }}</h1>
         <p class="form-subtitle">Completa los detalles de tu rutina de entrenamiento</p>
 
-        <form method="POST" action="{{ url_for('create_routine') }}" novalidate>
+        <form method="POST" action="{{ url_for('create_routine') }}" novalidate id="routine-form">
             {{ form.hidden_tag() }}
 
             <div class="form-group">
                 {{ form.name.label }}
-                {{ form.name(class="form-control", placeholder="Ej. Rutina de Piernas") }}
+                {{ form.name(class="form-control", placeholder="ej. Entrenamiento de Cuerpo Completo") }}
                 {% if form.name.errors %}
                     <div class="form-errors">
                         {% for error in form.name.errors %}
@@ -37,7 +37,7 @@
 
             <div class="form-group">
                 {{ form.description.label }}
-                {{ form.description(class="form-control", rows="5", placeholder="Describe tu rutina, objetivos, etc") }}
+                {{ form.description(class="form-control", rows="4", placeholder="Describe tu rutina, sus objetivos y para quién está dirigida...") }}
                 {% if form.description.errors %}
                     <div class="form-errors">
                         {% for error in form.description.errors %}
@@ -47,19 +47,18 @@
                 {% endif %}
             </div>
 
-            <div class="form-group">
-                {{ form.exercises.label }}
-                {{ form.exercises(class="form-control", rows="8", placeholder="Ejemplo:\n- Sentadillas: 3 sets x 10 reps\n- Press Banca: 3 sets x 8 reps\n- Peso muerto: 3 sets x 5 reps") }}
-                {% if form.exercises.errors %}
-                    <div class="form-errors">
-                        {% for error in form.exercises.errors %}
-                            <span class="error">{{ error }}</span>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-                {% if form.exercises.description %}
-                    <small class="form-help">{{ form.exercises.description }}</small>
-                {% endif %}
+            <!-- Sección de Ejercicios -->
+            <div class="exercises-section">
+                <h3>Ejercicios</h3>
+                <p class="form-help">Agrega los ejercicios que forman parte de esta rutina</p>
+
+                <div id="exercises-container">
+                    <!-- Los ejercicios se agregarán dinámicamente aquí -->
+                </div>
+
+                <button type="button" class="btn btn-secondary" id="add-exercise-btn">
+                    + Agregar Ejercicio
+                </button>
             </div>
 
             <div class="form-actions">
@@ -69,4 +68,163 @@
         </form>
     </div>
 </div>
+
+<style>
+.exercises-section {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+}
+
+.exercises-section h3 {
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.exercise-item {
+    background-color: white;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    position: relative;
+}
+
+.exercise-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.exercise-number {
+    font-weight: bold;
+    color: var(--primary-color);
+    font-size: 1.1rem;
+}
+
+.remove-exercise-btn {
+    background-color: var(--error-color);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.remove-exercise-btn:hover {
+    opacity: 0.8;
+}
+
+.exercise-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.exercise-notes {
+    grid-column: 1 / -1;
+}
+
+@media (max-width: 768px) {
+    .exercise-row {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script>
+let exerciseCount = 0;
+
+function createExerciseItem(index) {
+    return '<div class="exercise-item" data-index="' + index + '">' +
+        '<div class="exercise-header">' +
+            '<span class="exercise-number">Ejercicio #' + (index + 1) + '</span>' +
+            '<button type="button" class="remove-exercise-btn" onclick="removeExercise(' + index + ')">' +
+                'Eliminar' +
+            '</button>' +
+        '</div>' +
+        '<div class="exercise-row">' +
+            '<div class="form-group">' +
+                '<label>Nombre del Ejercicio *</label>' +
+                '<input type="text" name="exercises[' + index + '][name]" class="form-control" ' +
+                       'placeholder="ej. Sentadillas" required>' +
+            '</div>' +
+            '<div class="form-group">' +
+                '<label>Series *</label>' +
+                '<input type="number" name="exercises[' + index + '][sets]" class="form-control" ' +
+                       'placeholder="3" min="1" required>' +
+            '</div>' +
+            '<div class="form-group">' +
+                '<label>Repeticiones *</label>' +
+                '<input type="number" name="exercises[' + index + '][reps]" class="form-control" ' +
+                       'placeholder="10" min="1" required>' +
+            '</div>' +
+            '<div class="form-group">' +
+                '<label>Peso</label>' +
+                '<input type="number" name="exercises[' + index + '][weight]" class="form-control" ' +
+                       'placeholder="50" min="0" step="0.5">' +
+            '</div>' +
+            '<div class="form-group">' +
+                '<label>Unidad</label>' +
+                '<select name="exercises[' + index + '][weight_unit]" class="form-control">' +
+                    '<option value="kg">kg</option>' +
+                    '<option value="lb">lb</option>' +
+                '</select>' +
+            '</div>' +
+        '</div>' +
+        '<div class="exercise-notes">' +
+            '<div class="form-group">' +
+                '<label>Notas (opcional)</label>' +
+                '<textarea name="exercises[' + index + '][notes]" class="form-control" rows="2" ' +
+                          'placeholder="Instrucciones especiales o notas sobre este ejercicio..."></textarea>' +
+            '</div>' +
+        '</div>' +
+    '</div>';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Agregar ejercicio al hacer clic
+    document.getElementById('add-exercise-btn').addEventListener('click', function() {
+        const container = document.getElementById('exercises-container');
+        const newExercise = createExerciseItem(exerciseCount);
+        container.insertAdjacentHTML('beforeend', newExercise);
+        exerciseCount++;
+    });
+
+    // Validar formulario antes de enviar
+    document.getElementById('routine-form').addEventListener('submit', function(e) {
+        const exercises = document.querySelectorAll('.exercise-item');
+        if (exercises.length === 0) {
+            e.preventDefault();
+            alert('Debes agregar al menos un ejercicio a la rutina');
+            return false;
+        }
+    });
+
+    // Agregar un ejercicio inicial
+    document.getElementById('add-exercise-btn').click();
+});
+
+function removeExercise(index) {
+    const exerciseItem = document.querySelector('.exercise-item[data-index="' + index + '"]');
+    if (exerciseItem) {
+        exerciseItem.remove();
+        updateExerciseNumbers();
+    }
+}
+
+function updateExerciseNumbers() {
+    const exercises = document.querySelectorAll('.exercise-item');
+    exercises.forEach(function(item, index) {
+        const numberSpan = item.querySelector('.exercise-number');
+        if (numberSpan) {
+            numberSpan.textContent = 'Ejercicio #' + (index + 1);
+        }
+    });
+}
+</script>
 {% endblock %}

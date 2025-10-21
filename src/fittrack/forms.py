@@ -83,36 +83,29 @@ class LoginForm(FlaskForm):
 
 class RoutineForm(FlaskForm):
     """
-    Form for creating and editing workout routines.
+    Formulario para crear y editar rutinas de entrenamiento.
 
-    Fields:
-        name: Routine name/title (5-200 characters)
-        description: Detailed description (20-2000 characters)
-        exercises: List of exercises in routine (20-2000 characters)
-        difficulty: Difficulty level (Beginner/Intermediate/Advanced)
-        submit: Submit button
+    Campos:
+        name: Nombre de la rutina (5-200 caracteres)
+        description: Descripción detallada (20-2000 caracteres)
+        difficulty: Nivel de dificultad (Principiante/Intermedio/Avanzado)
+        submit: Botón de envío
+
+    Nota: Los ejercicios se manejan dinámicamente con JavaScript
     """
     name = StringField(
         'Nombre de la Rutina',
         validators=[
             DataRequired(message='El nombre de la rutina es requerido'),
-            Length(min=5, max=200, message='Name must be between 5 and 200 characters')
+            Length(min=5, max=200, message='El nombre debe tener entre 5 y 200 caracteres')
         ]
     )
     description = TextAreaField(
         'Descripción',
         validators=[
             DataRequired(message='La descripción es requerida'),
-            Length(min=20, max=2000, message='Description must be between 20 and 2000 characters')
+            Length(min=20, max=2000, message='La descripción debe tener entre 20 y 2000 caracteres')
         ]
-    )
-    exercises = TextAreaField(
-        'Ejercicios',
-        validators=[
-            DataRequired(message='Los ejercicios son requeridos'),
-            Length(min=20, max=2000, message='Exercises must be between 20 and 2000 characters')
-        ],
-        description='Liste los ejercicios en esta rutina (uno por línea o separados por comas)'
     )
     difficulty = SelectField(
         'Nivel de Dificultad',

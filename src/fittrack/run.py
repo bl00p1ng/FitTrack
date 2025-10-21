@@ -8,7 +8,8 @@ from flask import Flask, render_template, redirect, url_for, flash, request, abo
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from sqlalchemy.exc import IntegrityError
 
-from .models import db, User, Routine
+from .models import db, User, Routine, Exercise
+import json
 from .forms import SignupForm, LoginForm, RoutineForm
 
 
@@ -184,32 +185,70 @@ def logout():
 @login_required
 def create_routine():
     """
-    Crea una nueva rutina de entrenamiento (es necesario iniciar sesión).
+    Crea una nueva rutina de entrenamiento con ejercicios dinámicos.
+    Procesa los ejercicios enviados desde el formulario mediante JavaScript.
 
     Returns:
-        Redirigir a los detalles de la rutina en caso de éxito, formulario en GET/fracaso.
+        Redirige a los detalles de la rutina en caso de éxito, muestra formulario en GET/fallo
     """
     form = RoutineForm()
 
     if form.validate_on_submit():
-        # Crear nueva rutina asociada al usuario actual
+        # Crea una nueva rutina asociada al usuario actual
         routine = Routine(
             user_id=current_user.id,
             name=form.name.data,
             description=form.description.data,
-            exercises=form.exercises.data,
             difficulty=form.difficulty.data
         )
 
         try:
+            # Primero guarda la rutina para obtener su ID
             routine.save()
+            
+            # Procesa los ejercicios desde request.form
+            # Los ejercicios vienen como exercises[0][name], exercises[0][sets], etc.
+            exercise_indices = set()
+            for key in request.form.keys():
+                if key.startswith('exercises[') and '][' in key:
+                    # Extrae el índice del ejercicio
+                    index = key.split('[')[1].split(']')[0]
+                    exercise_indices.add(int(index))
+            
+            # Crea cada ejercicio
+            for idx in sorted(exercise_indices):
+                exercise_name = request.form.get(f'exercises[{idx}][name]')
+                exercise_sets = request.form.get(f'exercises[{idx}][sets]')
+                exercise_reps = request.form.get(f'exercises[{idx}][reps]')
+                exercise_weight = request.form.get(f'exercises[{idx}][weight]')
+                exercise_unit = request.form.get(f'exercises[{idx}][weight_unit]', 'kg')
+                exercise_notes = request.form.get(f'exercises[{idx}][notes]', '')
+                
+                if exercise_name and exercise_sets and exercise_reps:
+                    exercise = Exercise(
+                        routine_id=routine.id,
+                        name=exercise_name,
+                        sets=int(exercise_sets),
+                        reps=int(exercise_reps),
+                        weight=float(exercise_weight) if exercise_weight else None,
+                        weight_unit=exercise_unit,
+                        order=idx,
+                        notes=exercise_notes
+                    )
+                    db.session.add(exercise)
+            
+            db.session.commit()
             flash('Rutina creada exitosamente!', 'success')
             return redirect(url_for('routine_detail', slug=routine.slug))
+            
         except IntegrityError:
             db.session.rollback()
             flash('Ocurrió un error al crear la rutina. Por favor intente nuevamente.', 'error')
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error: {str(e)}', 'error')
 
-    return render_template('admin/routine_form.html', form=form, title='Crear una nueva Rutina')
+    return render_template('admin/routine_form.html', form=form, title='Crear Nueva Rutina')
 
 
 @app.route('/admin/my-routines')
@@ -264,7 +303,6 @@ def init_db():
 def reset_db():
     """
     Elimine y vuelva a crear todas las tablas de la base de datos.
-    ADVERTENCIA: ¡Esto eliminará todos los datos!
     Uso: flask reset-db
     """
     db.drop_all()
