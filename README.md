@@ -101,7 +101,13 @@ python src/fittrack/run.py
 
 ### Environment Variables
 
-You can configure the application using environment variables:
+Configuration values are loaded from a `.env` file located at the project root. Start by copying the example file and filling in the values:
+
+```bash
+cp .env.example .env
+```
+
+You can configure the application using environment variables defined there or exported manually:
 
 ```bash
 # Secret key for session management (change in production!)

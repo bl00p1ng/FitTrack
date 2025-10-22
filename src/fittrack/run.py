@@ -1,16 +1,22 @@
-"""
-Rutas de la app y lógica de negocio principal
-"""
+"""Rutas de la app y lógica de negocio principal."""
 
+import json
 import os
+from pathlib import Path
 from urllib.parse import urlparse, urljoin
+
+from dotenv import load_dotenv
 from flask import Flask, render_template, redirect, url_for, flash, request, abort
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from sqlalchemy.exc import IntegrityError
 
-from .models import db, User, Routine, Exercise
-import json
 from .forms import SignupForm, LoginForm, RoutineForm, DeleteForm
+from .models import db, User, Routine, Exercise
+
+
+# Load environment variables from .env file located at the project root
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+load_dotenv(PROJECT_ROOT / ".env")
 
 
 # Initialize Flask app
